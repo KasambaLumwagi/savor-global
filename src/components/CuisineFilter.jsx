@@ -1,13 +1,17 @@
 import React from 'react';
 import './CuisineFilter.css';
 
-const CUISINES = ["All", "Italian", "Japanese", "Mexican", "Indian", "French", "Thai", "Greek", "Chinese"];
-
-export default function CuisineFilter({ selected, onSelect }) {
+export default function CuisineFilter({ cuisines, selected, onSelect }) {
     return (
         <div className="cuisine-filter-container container">
             <div className="cuisine-scroll">
-                {CUISINES.map(cuisine => (
+                <button
+                    className={`cuisine-pill ${selected === 'All' ? 'active' : ''}`}
+                    onClick={() => onSelect('All')}
+                >
+                    All
+                </button>
+                {cuisines.map(cuisine => (
                     <button
                         key={cuisine}
                         className={`cuisine-pill ${selected === cuisine ? 'active' : ''}`}

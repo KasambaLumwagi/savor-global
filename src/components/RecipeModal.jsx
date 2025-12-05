@@ -39,13 +39,20 @@ export default function RecipeModal({ recipe, onClose }) {
                         <div className="info-item">
                             <Users size={20} className="info-icon" />
                             <div>
-                                <span className="info-label">Servings</span>
-                                <span className="info-value">4 People</span>
+                                <span className="info-label">Calories</span>
+                                <span className="info-value">{recipe.calories || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
 
                     <p className="modal-description">{recipe.description}</p>
+
+                    {recipe.tips && (
+                        <div className="recipe-tips">
+                            <strong>Chef's Tip:</strong> {recipe.tips}
+                        </div>
+                    )}
+
 
                     <div className="modal-grid">
                         <div className="ingredients-section">

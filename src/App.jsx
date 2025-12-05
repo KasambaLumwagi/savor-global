@@ -11,14 +11,49 @@ function App() {
   const [selectedCuisine, setSelectedCuisine] = useState('All');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
+  // Favorites persistence
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const toggleFavorite = (id) => {
+    setFavorites(prev => {
+      const newFavorites = prev.includes(id)
+        ? prev.filter(fId => fId !== id)
+        : [...prev, id];
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
+
+  // Create unique list of cuisines
+  const cuisines = useMemo(() => {
+    const allCuisines = recipes.map(recipe => recipe.cuisine);
+    return ['Favorites', ...new Set(allCuisines)].sort((a, b) => {
+      if (a === 'Favorites') return -1;
+      if (b === 'Favorites') return 1;
+      return a.localeCompare(b);
+    });
+  }, []);
+
   const filteredRecipes = useMemo(() => {
     return recipes.filter(recipe => {
       const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         recipe.ingredients.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesCuisine = selectedCuisine === 'All' || recipe.cuisine === selectedCuisine;
+
+      let matchesCuisine = true;
+      if (selectedCuisine === 'All') {
+        matchesCuisine = true;
+      } else if (selectedCuisine === 'Favorites') {
+        matchesCuisine = favorites.includes(recipe.id);
+      } else {
+        matchesCuisine = recipe.cuisine === selectedCuisine;
+      }
+
       return matchesSearch && matchesCuisine;
     });
-  }, [searchTerm, selectedCuisine]);
+  }, [searchTerm, selectedCuisine, favorites]);
 
   return (
     <div className="app">
@@ -33,7 +68,7 @@ function App() {
           </div>
         </div>
 
-        <CuisineFilter selected={selectedCuisine} onSelect={setSelectedCuisine} />
+        <CuisineFilter cuisines={cuisines} selected={selectedCuisine} onSelect={setSelectedCuisine} />
 
         <div className="container" style={{ paddingBottom: '4rem' }}>
           <div className="grid-cols-auto">
@@ -43,6 +78,8 @@ function App() {
                   key={recipe.id}
                   recipe={recipe}
                   onClick={setSelectedRecipe}
+                  isFavorite={favorites.includes(recipe.id)}
+                  onToggleFavorite={toggleFavorite}
                 />
               ))
             ) : (
